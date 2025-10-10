@@ -4,7 +4,7 @@ const config = require('../config/env');
 const ALPHANUMERIC =
   'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
-function generateKey() {
+const generateKey = () => {
   const length = config.shortKeyLength;
   const randomBytes = crypto.randomBytes(length);
   let key = '';
@@ -15,9 +15,8 @@ function generateKey() {
   }
 
   return key;
-}
+};
 
 module.exports = {
   generateKey
 };
-

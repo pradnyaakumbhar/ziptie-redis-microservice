@@ -1,7 +1,7 @@
 const httpStatus = require('../enums/httpStatus');
 const healthService = require('../services/healthService');
 
-async function getHealth(req, res) {
+const getHealth = async (req, res) => {
   try {
     const status = await healthService.getHealthStatus();
     return res.status(httpStatus.OK).json(status);
@@ -11,7 +11,7 @@ async function getHealth(req, res) {
       .status(httpStatus.INTERNAL_SERVER_ERROR)
       .json({ status: 'error', message: 'Service unavailable' });
   }
-}
+};
 
 module.exports = {
   getHealth

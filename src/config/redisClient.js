@@ -3,7 +3,7 @@ const config = require('./env');
 
 let client;
 
-async function getRedisClient() {
+const getRedisClient = async () => {
   if (!client) {
     client = createClient(config.redis);
 
@@ -12,20 +12,20 @@ async function getRedisClient() {
     });
 
     await client.connect();
+    console.log('[redis] connected');
   }
 
   return client;
-}
+};
 
-async function closeRedisClient() {
+const closeRedisClient = async () => {
   if (client) {
     await client.quit();
     client = null;
   }
-}
+};
 
 module.exports = {
   getRedisClient,
   closeRedisClient
 };
-

@@ -2,7 +2,7 @@ const errorMessages = require('../enums/errorMessages');
 const httpStatus = require('../enums/httpStatus');
 const urlService = require('../services/urlService');
 
-function validateRequestBody(body) {
+const validateRequestBody = (body) => {
   const { ttl, longUrl, userId } = body || {};
 
   if (!longUrl || typeof longUrl !== 'string') {
@@ -19,9 +19,9 @@ function validateRequestBody(body) {
   }
 
   return null;
-}
+};
 
-async function createShortUrl(req, res) {
+const createShortUrl = async (req, res) => {
   const validationError = validateRequestBody(req.body);
 
   if (validationError) {
@@ -44,9 +44,8 @@ async function createShortUrl(req, res) {
       .status(httpStatus.INTERNAL_SERVER_ERROR)
       .json({ message: errorMessages.GENERIC_FAILURE });
   }
-}
+};
 
 module.exports = {
   createShortUrl
 };
-

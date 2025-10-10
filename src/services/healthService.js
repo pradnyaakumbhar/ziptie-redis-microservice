@@ -1,6 +1,6 @@
 const { getRedisClient } = require('../config/redisClient');
 
-async function getHealthStatus() {
+const getHealthStatus = async () => {
   const client = await getRedisClient();
   const redisStatus = await client.ping();
 
@@ -8,9 +8,8 @@ async function getHealthStatus() {
     status: 'ok',
     redis: redisStatus
   };
-}
+};
 
 module.exports = {
   getHealthStatus
 };
-

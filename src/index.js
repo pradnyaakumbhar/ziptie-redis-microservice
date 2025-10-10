@@ -2,7 +2,7 @@ const app = require('./app');
 const config = require('./config/env');
 const { getRedisClient, closeRedisClient } = require('./config/redisClient');
 
-async function start() {
+const start = async () => {
   try {
     await getRedisClient();
 
@@ -23,7 +23,6 @@ async function start() {
     console.error('Failed to start service', error);
     process.exit(1);
   }
-}
+};
 
 start();
-

@@ -4,7 +4,7 @@ const { generateKey } = require('../utils/keyGenerator');
 
 const MAX_KEY_GENERATION_ATTEMPTS = 5;
 
-async function generateUniqueKey(client) {
+const generateUniqueKey = async (client) => {
   for (let attempt = 0; attempt < MAX_KEY_GENERATION_ATTEMPTS; attempt += 1) {
     const candidate = generateKey();
     const exists = await client.exists(candidate);
@@ -15,9 +15,9 @@ async function generateUniqueKey(client) {
   }
 
   throw new Error('Unable to generate unique short key');
-}
+};
 
-function buildShortUrl(shortKey) {
+const buildShortUrl = (shortKey) => {
   if (!config.baseShortUrl) {
     return undefined;
   }
@@ -27,9 +27,9 @@ function buildShortUrl(shortKey) {
     : config.baseShortUrl;
 
   return `${normalizedBase}/${shortKey}`;
-}
+};
 
-async function createShortUrl({ ttl, longUrl, userId }) {
+const createShortUrl = async ({ ttl, longUrl, userId }) => {
   const client = await getRedisClient();
   const shortKey = await generateUniqueKey(client);
 
@@ -46,7 +46,7 @@ async function createShortUrl({ ttl, longUrl, userId }) {
     expiresIn: ttl,
     shortUrl: buildShortUrl(shortKey)
   };
-}
+};
 
 module.exports = {
   createShortUrl
