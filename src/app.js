@@ -4,6 +4,8 @@ const config = require('./config/env');
 
 const app = express();
 
+console.log('[cors] redis allowed origins:', config.corsAllowedOrigins);
+
 const allowOrigin = (origin) =>
   !origin ||
   config.corsAllowedOrigins.length === 0 ||
@@ -11,6 +13,7 @@ const allowOrigin = (origin) =>
 
 app.use((req, res, next) => {
   const origin = req.headers.origin;
+  console.log('[cors] redis request origin:', origin || '<none>');
 
   if (allowOrigin(origin)) {
     if (origin) {
@@ -33,6 +36,7 @@ app.use((req, res, next) => {
     return next();
   }
 
+  console.warn('[cors] redis origin rejected:', origin);
   return res.status(403).json({ message: 'Not allowed by CORS' });
 });
 
