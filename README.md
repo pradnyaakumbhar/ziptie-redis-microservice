@@ -1,10 +1,14 @@
-# ziptie-redis-microservice
+# ziptie-redis-microservice ⚡
+
+> Developed by [TanmayRokde](https://github.com/TanmayRokde) & [pradnyaakumbhar](https://github.com/pradnyaakumbhar)
 
 ![Express](https://img.shields.io/badge/express-4.x-black)
 ![Redis](https://img.shields.io/badge/storage-redis-red)
 ![License](https://img.shields.io/badge/license-ISC-blue)
+![Status](https://img.shields.io/badge/status-production-ready-brightgreen)
 
-Dedicated URL-shortening microservice. It accepts REST calls to create and resolve 12-character keys, persists the payload inside Redis (or Upstash REST), and responds with normalized short URLs.
+> **Ultra-fast key/value URL engine**  
+> Create and resolve short URLs with sub-millisecond responses thanks to Redis/Upstash, wrapped in a focused HTTP API.
 
 ---
 
@@ -22,7 +26,7 @@ Dedicated URL-shortening microservice. It accepts REST calls to create and resol
 
 ---
 
-## Overview
+## Overview 🛰️
 
 ```
 Client ─┐
@@ -40,12 +44,12 @@ The service focuses solely on short-link lifecycle:
 3. Store JSON + metadata in Redis with the requested TTL.
 4. Resolve keys to retrieve the original payload + computed `shortUrl`.
 
-## Prerequisites
+## Prerequisites ✅
 
 - Node.js 18+
 - Redis instance (localhost, Docker, or Upstash REST tokens)
 
-## Configuration
+## Configuration ⚙️
 
 Copy `.env.example` to `.env` and customize:
 
@@ -68,13 +72,13 @@ UPSTASH_REDIS_REST_TOKEN=
 
 Providing the Upstash variables toggles the REST client automatically. Otherwise `redis@5` handles the TCP connection.
 
-## Installation
+## Installation 📦
 
 ```bash
 npm install
 ```
 
-## Running
+## Running 🏃
 
 ```bash
 npm run dev   # if nodemon is configured
@@ -84,7 +88,7 @@ npm start
 
 Server binds to `PORT` (defaults to `3000`).
 
-## Endpoints
+## Endpoints 📡
 
 | Method | Path | Description | Sample Payload |
 | ------ | ---- | ----------- | -------------- |
@@ -94,20 +98,20 @@ Server binds to `PORT` (defaults to `3000`).
 
 Responses follow standard HTTP semantics: `201` on creation, `404` when a key is missing or expired, `500` for unexpected failures.
 
-## Internals
+## Internals 🧠
 
 - **Key generation:** `src/utils/keyGenerator.js` creates random identifiers.
 - **Service layer:** `src/services/urlService.js` (creation) and `src/services/resolveService.js` (lookup) encapsulate business logic.
 - **Redis client:** `src/config/redisClient.js` exports `getRedisClient()` that caches the client instance and supports both Upstash REST and native Redis.
 - **Routing:** `src/routes/*` exposes `shorten`, `resolve`, and `health` routers mounted in `src/routes/index.js`.
 
-## Development Tips
+## Development Tips 💡
 
 - Set `DEBUG=redis` to inspect Redis CLI activity (if you enable debug logging).
 - `npm run lint` is not defined yet—add ESLint/Prettier if you need formatting checks.
 - Write integration tests with `supertest` + `ioredis-mock` to simulate Redis in CI.
 
-## Operational Notes
+## Operational Notes 🛡️
 
 - Upstash client methods implement `get`, `set`, `exists`, and `ping`, mirroring the native Redis client for parity.
 - Payloads may be returned as strings or JSON depending on the transport; `resolveService` gracefully handles both.
