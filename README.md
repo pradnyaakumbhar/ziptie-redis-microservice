@@ -1,54 +1,73 @@
 # ziptie-redis-microservice
 
-Small Express service that stores long URLs in Redis under randomly generated 12 character identifiers.
+Express microservice responsible for the core URL shortening workflow. It stores JSON payloads inside Redis (or Upstash via REST) under 12-character identifiers and exposes fast endpoints that other ZipTie services call.
 
 ## Prerequisites
 
 - Node.js 18+
-- Redis instance (local or remote)
+- Redis instance (self-hosted, Docker, or Upstash REST)
 
 ## Environment
 
-You can provide connection details via a `.env` file or environment variables:
+Copy `.env.example` to `.env` and fill in the variables that match your setup:
 
-- `PORT` (default `3000`)
-- `BASE_SHORT_URL` (optional, prepended to the generated short key in responses)
-- `REDIS_URL` (full connection string, e.g. `redis://localhost:6379`)
-- or `REDIS_HOST`, `REDIS_PORT`, `REDIS_USERNAME`, `REDIS_PASSWORD`
-- `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` (optional, uses Upstash REST API and falls back to the local Redis settings above when absent)
+```
+PORT=3000
+BASE_SHORT_URL=https://links.ziptie.dev
 
-Copy `.env.example` to `.env` to get started with sensible defaults.
+# Redis TCP
+REDIS_URL=redis://localhost:6379
+# or granular:
+REDIS_HOST=127.0.0.1
+REDIS_PORT=6379
+REDIS_USERNAME=
+REDIS_PASSWORD=
+
+# Optional Upstash REST fallback
+UPSTASH_REDIS_REST_URL=
+UPSTASH_REDIS_REST_TOKEN=
+```
+
+When the Upstash variables are present the service automatically switches to the REST client; otherwise it connects via `redis@5`.
 
 ## Install & Run
 
 ```bash
 npm install
-npm start
+npm run dev    # nodemon (if configured) or use npm start
+npm start      # production mode
 ```
 
-### Folder Layout
+The server listens on `PORT` (defaults to `3000`).
+
+## Endpoints
+
+| Method & Path | Description |
+| ------------- | ----------- |
+| `POST /shorten` | Body: `{ ttl, longUrl, userId }`. Generates a 12-char key, stores the payload as JSON in Redis with TTL (seconds), and responds with `{ shortKey, expiresIn, shortUrl }`. |
+| `POST /resolve` | Body: `{ shortKey }`. Looks up the key, parses the stored JSON, and returns `{ longUrl, userId, createdAt, shortUrl }`. Responds with `404` if missing or expired. |
+| `GET /health` | Returns `{ server: 'ok', redis: 'connected' }` plus timestamps. |
+
+## Project Layout
 
 ```
 src/
-  app.js                # Express app wiring
-  index.js              # Service entry point
-  config/
-    env.js              # Environment configuration
-    redisClient.js      # Redis client lifecycle
-  controllers/          # Request handlers
-  services/             # Business logic
-  routes/               # Express routers
-  utils/                # Helper utilities
-  enums/                # Shared constants/enums
+  index.js              # Service entry
+  app.js                # Express wiring & middleware
+  config/               # env + Redis client factories
+  controllers/          # HTTP handlers
+  services/             # Shorten/resolve logic
+  routes/               # Express routers per resource
+  utils/                # helpers (key generator, response builders)
+  enums/                # shared constants
 ```
 
-### Endpoints
+## Development Notes
 
-- `POST /shorten` – body: `{ "ttl": 3600, "longUrl": "https://example.com", "userId": "user-123" }`
-  - Stores the payload at a unique 12 character key with the provided TTL (seconds).
-  - Responds with `{ "shortKey": "AbC123...", "expiresIn": 3600, "shortUrl": "BASE_SHORT_URL/AbC123..." }`.
-- `GET /health` – returns the server and Redis status.
+- `src/config/redisClient.js` transparently swaps between Redis TCP and Upstash REST.
+- Payloads are stored as JSON strings; the resolver gracefully handles strings or objects so Upstash responses work as expected.
+- Use `npm test` once you add coverage; currently there are no automated tests.
 
-## Stopping
+## Shutdown
 
-Ctrl+C triggers a graceful shutdown and closes the Redis connection.
+Use `Ctrl+C` to stop the process. The `closeRedisClient` helper drains the Redis connection (or no-ops if using Upstash REST) for a clean exit.
